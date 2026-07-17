@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "skills": {
+    "code-review": {
+      "source": "mattpocock/skills",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "4a17d9d3e0fc87ae48544d371a820fac5a4a78f4c05e7e6b3229094fbf8a7e26",
+      "claudePlugin": "mattpocock-skills"
+    },
+    "codebase-design": {
+      "source": "mattpocock/skills",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "2426dc4accf1a85dedfb560edb3a877ec8828b7375ea08c970df2b6c900a2a22",
+      "claudePlugin": "mattpocock-skills"
+    },
+    "domain-modeling": {
+      "source": "mattpocock/skills",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "67343881f5def98487d56243155716110afbcbf22ec92421c882d532b941cb17",
+      "claudePlugin": "mattpocock-skills"
+    },
+    "grill-me": {
+      "source": "mattpocock/skills",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "f321507f77702a54af1db66549ec1685fc625390d06c57d7949cdcda8eb1b5c7",
+      "claudePlugin": "mattpocock-skills"
+    },
+    "grill-with-docs": {
+      "source": "mattpocock/skills",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "e7ef25bbee50cda2eb7b3a8ef541db0a0396dad7d369f7d14fb610671dd1864b",
+      "claudePlugin": "mattpocock-skills"
+    },
+    "grilling": {
+      "source": "mattpocock/skills",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "1de9e777a60b184b29412fadacb7bbde8c14bb7037e5c4d9d086c941281d1742",
+      "claudePlugin": "mattpocock-skills"
+    },
+    "handoff": {
+      "source": "mattpocock/skills",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "87e353708ab36062eac54ddb593a97ca553c0cb4bfa1ed1fdaf68520700723f1",
+      "claudePlugin": "mattpocock-skills"
+    },
+    "hunt": {
+      "source": "tw93/Waza",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "fc355ebb0aa86879122b56191d59f964abc22218d5685a70fee1b978598e1705",
+      "claudePlugin": "waza"
+    },
+    "implement": {
+      "source": "mattpocock/skills",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "0d51255cab5cf937b8fe41252f00213706e0175ca9607fc00409d29562b5b839",
+      "claudePlugin": "mattpocock-skills"
+    },
+    "research": {
+      "source": "mattpocock/skills",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "87d17f5103899fbe179b552a85485d50f2316ca5b3128f5716af7d88817533e1",
+      "claudePlugin": "mattpocock-skills"
+    },
+    "tdd": {
+      "source": "mattpocock/skills",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "c9326b88419cfba1d54dd713b7ddb23020e6a93f4b0d13aea58cebba58cda2ee",
+      "claudePlugin": "mattpocock-skills"
+    },
+    "think": {
+      "source": "tw93/Waza",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "76af50357f83983f67ab4cdabba92960a57915b4a6ba00d3ac6f396943584c49",
+      "claudePlugin": "waza"
+    },
+    "write": {
+      "source": "tw93/Waza",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "99a94b02dc38e48f12b2075a421d4f9a1a581968267d34e2fe4d98b117b2b9a8",
+      "claudePlugin": "waza"
+    }
+  }
+}

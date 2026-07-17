@@ -1,0 +1,26 @@
+{
+  "name": "water",
+  "description": "Personal configuration for a consistent AI coding agent experience across Claude Code, Codex, Pi, OpenCode, and more.",
+  "type": "module",
+  "scripts": {
+    "test": "npm run test:pi",
+    "test:pi": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test pi/extensions/*/index.test.ts",
+    "check": "biome check --write --error-on-warnings . && npm run test:pi && tsc --noEmit --skipLibCheck --allowImportingTsExtensions pi/extensions/*/*.ts",
+    "setup:dev": "husky"
+  },
+  "pi": {
+    "extensions": [
+      "./pi/extensions"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": ">=0.50.0",
+    "@earendil-works/pi-ai": ">=0.50.0",
+    "@earendil-works/pi-tui": ">=0.50.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.4",
+    "typescript": "^7.0.2",
+    "husky": "^9.1.7"
+  }
+}
