@@ -1,0 +1,2 @@
+- Proactively spawn subagents for independent, parallelizable, or context-heavy subtasks.
+- Subagents should not spawn further subagents unless explicitly needed.
