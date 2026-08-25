@@ -29,6 +29,24 @@ type ParsedAtPrefix = {
 
 const PATH_DELIMITERS = new Set([" ", "\t", '"', "'", "="]);
 
+const MANAGEMENT_COMPLETIONS: AutocompleteItem[] = [
+  {
+    value: "--list",
+    label: "--list",
+    description: "Show added directories",
+  },
+  {
+    value: "--clear",
+    label: "--clear",
+    description: "Remove all added directories",
+  },
+  {
+    value: "--remove ",
+    label: "--remove",
+    description: "Remove one added directory",
+  },
+];
+
 const addedDirs = new Set<string>();
 let fdPath: string | undefined;
 
@@ -252,6 +270,32 @@ function absoluteAutocompleteItem(item: AutocompleteItem, root: string, parsed: 
   };
 }
 
+function quoteCommandPath(value: string): string {
+  const displayPath = toDisplayPath(value);
+  return /\s/u.test(displayPath) ? `"${displayPath}"` : displayPath;
+}
+
+function getAddDirArgumentCompletions(prefix: string): AutocompleteItem[] | null {
+  const argument = prefix.trimStart();
+  if (!argument.startsWith("-")) return null;
+
+  if (/^--remove\s/u.test(argument)) {
+    const query = argument.slice("--remove".length).trim().replace(/^["']/u, "").replace(/["']$/u, "").toLowerCase();
+    const items = [...addedDirs]
+      .map((dir) => ({ dir, displayPath: toDisplayPath(dir) }))
+      .filter(({ displayPath }) => displayPath.toLowerCase().includes(query))
+      .map(({ dir, displayPath }) => ({
+        value: `--remove ${quoteCommandPath(dir)}`,
+        label: displayPath,
+        description: "Remove this added directory",
+      }));
+    return items.length > 0 ? items : null;
+  }
+
+  const items = MANAGEMENT_COMPLETIONS.filter((item) => item.value.startsWith(argument));
+  return items.length > 0 ? items : null;
+}
+
 function mergeAutocompleteItems(
   addedItems: AutocompleteItem[],
   baseItems: AutocompleteItem[] | undefined,
@@ -292,17 +336,26 @@ async function getSuggestionsForAddedDir(
     .map((item) => absoluteAutocompleteItem(item, dir, parsed));
 }
 
+function shouldPreferAddDirArgumentCompletion(textBeforeCursor: string): boolean {
+  return /^\/add-dir(?::\d+)?\s+-/u.test(textBeforeCursor.trimStart());
+}
+
 function createAddedDirsAutocompleteProvider(current: AutocompleteProvider): AutocompleteProvider {
   return {
     async getSuggestions(lines, cursorLine, cursorCol, options): Promise<AutocompleteSuggestions | null> {
       const currentLine = lines[cursorLine] ?? "";
-      const parsed = parseAtPrefix(currentLine.slice(0, cursorCol));
+      const textBeforeCursor = currentLine.slice(0, cursorCol);
+      const delegatedOptions =
+        options.force && shouldPreferAddDirArgumentCompletion(textBeforeCursor)
+          ? { ...options, force: false }
+          : options;
+      const parsed = parseAtPrefix(textBeforeCursor);
       if (!parsed || addedDirs.size === 0) {
-        return current.getSuggestions(lines, cursorLine, cursorCol, options);
+        return current.getSuggestions(lines, cursorLine, cursorCol, delegatedOptions);
       }
 
       const [baseSuggestions, addedItemsByDir] = await Promise.all([
-        current.getSuggestions(lines, cursorLine, cursorCol, options).catch(() => null),
+        current.getSuggestions(lines, cursorLine, cursorCol, delegatedOptions).catch(() => null),
         Promise.all(
           [...addedDirs].map((dir) => getSuggestionsForAddedDir(dir, parsed, lines, cursorLine, cursorCol, options)),
         ),
@@ -335,27 +388,8 @@ export default function addDirExtension(pi: ExtensionAPI) {
   });
 
   pi.registerCommand("add-dir", {
-    description: "Add a directory to the LLM-visible workspace context and @ file completion",
-    getArgumentCompletions: (prefix) => {
-      if (prefix.trim().length > 0) return null;
-      return [
-        {
-          value: "--list",
-          label: "--list",
-          description: "Show added directories",
-        },
-        {
-          value: "--clear",
-          label: "--clear",
-          description: "Remove all added directories",
-        },
-        {
-          value: "--remove ",
-          label: "--remove",
-          description: "Remove one added directory",
-        },
-      ];
-    },
+    description: "Add a directory to workspace context (type -- for management)",
+    getArgumentCompletions: getAddDirArgumentCompletions,
     handler: async (args, ctx) => {
       const { command, rest } = splitCommand(args);
 
