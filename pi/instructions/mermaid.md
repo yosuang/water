@@ -1,0 +1,1 @@
+- When outputting Mermaid flowcharts, use flowchart TD by default; use flowchart LR only when the user explicitly requests a horizontal layout.
