@@ -21,7 +21,9 @@ type FakeEditor = EditorComponent & {
 };
 
 type LoadExtensionOptions = {
+  cwd?: string;
   hasExistingEditor?: boolean;
+  sessionFile?: string;
 };
 
 function createFakeEditor(initialText: string): FakeEditor {
@@ -73,11 +75,12 @@ function createFakeEditor(initialText: string): FakeEditor {
 function loadExtension(
   initialEditorText: string,
   branch: unknown[] = [],
-  { hasExistingEditor = true }: LoadExtensionOptions = {},
+  { cwd = "/project", hasExistingEditor = true, sessionFile }: LoadExtensionOptions = {},
 ) {
   const shortcuts = new Map<string, ShortcutHandler>();
   const handlers = new Map<string, EventHandler[]>();
   const entries: Array<{ customType: string; data: unknown }> = [];
+  const notifications: Array<{ message: string; level: string }> = [];
   const baseEditor = createFakeEditor(initialEditorText);
   let activeEditor: EditorComponent = baseEditor;
   let editorInstallations = 0;
@@ -97,14 +100,19 @@ function loadExtension(
   } as any);
 
   const ctx = {
+    cwd,
     hasUI: true,
     mode: "tui",
     sessionManager: {
       getBranch: () => branch,
+      getSessionFile: () => sessionFile,
     },
     ui: {
       getEditorComponent: () => (hasExistingEditor ? ((() => baseEditor) as EditorFactory) : undefined),
       getEditorText: () => activeEditor.getExpandedText?.() ?? activeEditor.getText(),
+      notify: (message: string, level: string) => {
+        notifications.push({ message, level });
+      },
       setEditorComponent: (factory: EditorFactory) => {
         editorInstallations += 1;
         activeEditor = factory({}, {}, {});
@@ -123,6 +131,7 @@ function loadExtension(
     getEditorInstallations: () => editorInstallations,
     getEditorText: () => activeEditor.getExpandedText?.() ?? activeEditor.getText(),
     handlers,
+    notifications,
     pressEditor: (data: string) => activeEditor.handleInput(data),
     setEditorText: (text: string) => {
       activeEditor.setText(text);
@@ -132,10 +141,34 @@ function loadExtension(
   };
 }
 
-async function startExtension(extension: ReturnType<typeof loadExtension>): Promise<void> {
+async function startExtension(
+  extension: ReturnType<typeof loadExtension>,
+  event: { previousSessionFile?: string; reason: string } = { reason: "startup" },
+): Promise<void> {
   const sessionStart = extension.handlers.get("session_start")?.[0];
   assert.ok(sessionStart);
-  await sessionStart({}, extension.ctx);
+  await sessionStart(event, extension.ctx);
+}
+
+async function shutdownExtension(
+  extension: ReturnType<typeof loadExtension>,
+  event: { reason: string; targetSessionFile?: string },
+): Promise<void> {
+  const sessionShutdown = extension.handlers.get("session_shutdown")?.[0];
+  assert.ok(sessionShutdown);
+  await sessionShutdown(event, extension.ctx);
+}
+
+function stashEntry(prompt: string): unknown {
+  return {
+    type: "custom",
+    customType: "water-prompt-stash-state",
+    data: {
+      action: "stash",
+      prompt,
+      timestamp: 1,
+    },
+  };
 }
 
 const TRANSFER_KEY_INPUT = "\x13";
@@ -335,4 +368,129 @@ test("the Transfer Shortcut does nothing when the editor and Stash Slot are blan
 
   assert.equal(extension.getEditorText(), " \n");
   assert.deepEqual(extension.entries, []);
+});
+
+test("a recreated session runtime copies the previous Stash Slot into its Prompt Editor without changing either Stash Slot", async () => {
+  const previousBranch = [stashEntry("continue in the new session")];
+  const previous = loadExtension("", previousBranch, {
+    sessionFile: "/sessions/previous.jsonl",
+  });
+  await startExtension(previous);
+  await shutdownExtension(previous, {
+    reason: "new",
+    targetSessionFile: "/sessions/new.jsonl",
+  });
+
+  const next = loadExtension("", [], {
+    sessionFile: "/sessions/new.jsonl",
+  });
+  await startExtension(next, {
+    previousSessionFile: "/sessions/previous.jsonl",
+    reason: "new",
+  });
+
+  assert.equal(next.getEditorText(), "continue in the new session");
+  assert.deepEqual(previous.entries, []);
+  assert.deepEqual(next.entries, []);
+
+  next.setEditorText("");
+  next.pressEditor(TRANSFER_KEY_INPUT);
+  assert.equal(next.getEditorText(), "");
+  assert.deepEqual(next.entries, []);
+
+  const resumedPrevious = loadExtension("", previousBranch, {
+    sessionFile: "/sessions/previous.jsonl",
+  });
+  await startExtension(resumedPrevious, {
+    previousSessionFile: "/sessions/new.jsonl",
+    reason: "resume",
+  });
+  resumedPrevious.pressEditor(TRANSFER_KEY_INPUT);
+  assert.equal(resumedPrevious.getEditorText(), "continue in the new session");
+});
+
+test("only the destination session runtime consumes a persisted Session Carryover", async () => {
+  const previous = loadExtension("", [stashEntry("intended destination only")], {
+    sessionFile: "/sessions/source.jsonl",
+  });
+  await startExtension(previous);
+  await shutdownExtension(previous, {
+    reason: "new",
+    targetSessionFile: "/sessions/intended.jsonl",
+  });
+
+  const unrelated = loadExtension("", [], {
+    sessionFile: "/sessions/unrelated.jsonl",
+  });
+  await startExtension(unrelated, { reason: "new" });
+  assert.equal(unrelated.getEditorText(), "");
+
+  const intended = loadExtension("", [], {
+    sessionFile: "/sessions/intended.jsonl",
+  });
+  await startExtension(intended, { reason: "new" });
+  assert.equal(intended.getEditorText(), "intended destination only");
+});
+
+test("Session Carryover supports recreated in-memory runtimes and does not chain ordinary Prompt Editor text", async () => {
+  const previous = loadExtension("", [stashEntry("  exact draft\n")], {
+    cwd: "/in-memory-carryover",
+  });
+  await startExtension(previous);
+  await shutdownExtension(previous, { reason: "new" });
+
+  const next = loadExtension("", [], {
+    cwd: "/in-memory-carryover",
+  });
+  await startExtension(next, { reason: "new" });
+  assert.equal(next.getEditorText(), "  exact draft\n");
+
+  await shutdownExtension(next, { reason: "new" });
+  const third = loadExtension("", [], {
+    cwd: "/in-memory-carryover",
+  });
+  await startExtension(third, { reason: "new" });
+  assert.equal(third.getEditorText(), "");
+});
+
+test("Session Carryover replaces whitespace-only Prompt Editor content", async () => {
+  const previous = loadExtension("", [stashEntry("carried draft")]);
+  await startExtension(previous);
+  await shutdownExtension(previous, { reason: "new" });
+
+  const next = loadExtension(" \n\t");
+  await startExtension(next, { reason: "new" });
+
+  assert.equal(next.getEditorText(), "carried draft");
+  assert.deepEqual(next.notifications, []);
+});
+
+test("Session Carryover preserves occupied Prompt Editor content and warns", async () => {
+  const previous = loadExtension("", [stashEntry("do not overwrite with this")]);
+  await startExtension(previous);
+  await shutdownExtension(previous, { reason: "new" });
+
+  const next = loadExtension("keep this editor content");
+  await startExtension(next, { reason: "new" });
+
+  assert.equal(next.getEditorText(), "keep this editor content");
+  assert.deepEqual(next.notifications, [
+    {
+      level: "warning",
+      message: "Session Carryover skipped because the new Prompt Editor is not empty.",
+    },
+  ]);
+});
+
+test("Session Carryover does not run for resume, fork, or clone transitions", async () => {
+  for (const reason of ["resume", "fork"]) {
+    const previous = loadExtension("", [stashEntry(`do not carry on ${reason}`)]);
+    await startExtension(previous);
+    await shutdownExtension(previous, { reason });
+
+    const next = loadExtension("");
+    await startExtension(next, { reason });
+
+    assert.equal(next.getEditorText(), "");
+  }
 });

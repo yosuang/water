@@ -8,6 +8,7 @@
 - 输入框为空或只有空白字符时，使用同一个快捷键恢复已暂存草稿。
 - 在编辑器上方显示已暂存 prompt 的短预览。
 - 将暂存状态写入 session，并在会话恢复或 session tree 切换后重建。
+- 成功创建新 session 时，将旧 session 当前分支的暂存内容复制到新 Prompt Editor；旧 session 保持不变，新 session 的暂存槽保持为空。
 
 ## 快捷键
 
@@ -28,6 +29,10 @@
 - 恢复会消费暂存内容；暂存槽为空时快捷键不执行操作。
 - 草稿的首尾空白会原样保留，但只有空白字符的输入框视为空白。
 - 暂存内容属于当前会话分支，不作为全局配置保存。
+- Session Carryover 只适用于成功创建新 session，不适用于 resume、fork 或 clone。
+- Carryover 只复制暂存槽，不复制普通 Prompt Editor 内容；连续创建新 session 前需要重新暂存。
+- 新 Prompt Editor 已有非空白内容时不会被覆盖，并会显示 warning；只有空白字符时允许填入。
+- Carryover 后的内容是普通未发送草稿，不额外持久化；旧 session 的暂存内容仍然保留。
 - 该 extension 包装当前编辑器，不注册全局 extension shortcut 或 slash command。
 
 ## 使用

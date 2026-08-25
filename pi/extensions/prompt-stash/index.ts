@@ -8,8 +8,47 @@ const STATE_ENTRY_TYPE = "water-prompt-stash-state";
 const WIDGET_KEY = "prompt-stash";
 const PREVIEW_LENGTH = 10;
 const WIDGET_INDENT = "   ";
+const CARRYOVER_REGISTRY_KEY = Symbol.for("water.prompt-stash.carryover-registry");
 
 type StateEntry = { action: "stash"; prompt: string; timestamp: number } | { action: "clear"; timestamp: number };
+
+function getCarryoverRegistry(): Map<string, string> {
+  // Pi recreates extension modules and their event bus during session replacement.
+  // Keep a process-local mailbox keyed by the destination session instead.
+  const globalState = globalThis as typeof globalThis & Record<symbol, unknown>;
+  const existingRegistry = globalState[CARRYOVER_REGISTRY_KEY];
+  if (existingRegistry instanceof Map) return existingRegistry as Map<string, string>;
+
+  const registry = new Map<string, string>();
+  globalState[CARRYOVER_REGISTRY_KEY] = registry;
+  return registry;
+}
+
+function carryoverKey(sessionFile: string | undefined, cwd: string): string {
+  return sessionFile ? `session:${sessionFile}` : `memory:${cwd}`;
+}
+
+function stageSessionCarryover(
+  targetSessionFile: string | undefined,
+  cwd: string,
+  prompt: string | undefined,
+): void {
+  const registry = getCarryoverRegistry();
+  const key = carryoverKey(targetSessionFile, cwd);
+  if (prompt) {
+    registry.set(key, prompt);
+  } else {
+    registry.delete(key);
+  }
+}
+
+function consumeSessionCarryover(ctx: ExtensionContext): string | undefined {
+  const registry = getCarryoverRegistry();
+  const key = carryoverKey(ctx.sessionManager.getSessionFile(), ctx.cwd);
+  const prompt = registry.get(key);
+  registry.delete(key);
+  return prompt;
+}
 
 function matchesTransferKey(data: string): boolean {
   return TRANSFER_KEYS.some((key) => matchesKey(data, key));
@@ -126,7 +165,9 @@ export default function promptStashExtension(pi: ExtensionAPI) {
     updateWidget(ctx);
   }
 
-  pi.on("session_start", (_event, ctx) => {
+  pi.on("session_start", (event, ctx) => {
+    const carryoverPrompt = event.reason === "new" && ctx.mode === "tui" ? consumeSessionCarryover(ctx) : undefined;
+
     restoreStash(ctx);
     if (ctx.mode !== "tui") return;
 
@@ -135,6 +176,19 @@ export default function promptStashExtension(pi: ExtensionAPI) {
       const baseEditor = previousEditorFactory?.(tui, theme, keybindings) ?? new CustomEditor(tui, theme, keybindings);
       return wrapEditor(baseEditor, () => transferDraft(ctx));
     });
+
+    if (!carryoverPrompt) return;
+    if (ctx.ui.getEditorText().trim().length > 0) {
+      ctx.ui.notify("Session Carryover skipped because the new Prompt Editor is not empty.", "warning");
+      return;
+    }
+
+    ctx.ui.setEditorText(carryoverPrompt);
+  });
+
+  pi.on("session_shutdown", (event, ctx) => {
+    if (event.reason !== "new" || ctx.mode !== "tui") return;
+    stageSessionCarryover(event.targetSessionFile, ctx.cwd, stashedPrompt);
   });
 
   pi.on("session_tree", (_event, ctx) => {
