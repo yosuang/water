@@ -7,7 +7,7 @@ import instructionsExtension from "./index.ts";
 
 type Handler = (event: any, ctx: any) => any;
 
-test("injects bundled Markdown instructions in relative-path order", async () => {
+test("injects Markdown instructions in relative-path order with absolute source paths", async () => {
   const instructionsDir = mkdtempSync(join(tmpdir(), "pi-instructions-"));
 
   try {
@@ -52,23 +52,23 @@ test("injects bundled Markdown instructions in relative-path order", async () =>
     assert.deepEqual(result, {
       systemPrompt: `BASE
 
-## Shared Instructions
+<personal_context>
 
-The Water extension provides the following shared instructions. Follow them in addition to the existing system instructions.
+Personal-specific instructions and guidelines:
 
-Instructions from Water extension: nested/first.md
-<INSTRUCTIONS>
+<personal_instructions source="${join(instructionsDir, "nested", "first.md")}">
 # Nested
 
 - Nested instruction.
-</INSTRUCTIONS>
+</personal_instructions>
 
-Instructions from Water extension: z-last.md
-<INSTRUCTIONS>
+<personal_instructions source="${join(instructionsDir, "z-last.md")}">
 # Last
 
 - Last instruction.
-</INSTRUCTIONS>
+</personal_instructions>
+
+</personal_context>
 `,
     });
   } finally {

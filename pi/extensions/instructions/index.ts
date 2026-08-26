@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 type LoadedInstruction = {
-  relativePath: string;
+  sourcePath: string;
   content: string;
 };
 
@@ -65,9 +65,10 @@ function scanInstructions(instructionsDir: string): InstructionScanResult {
   const instructionFiles = findMarkdownFiles(instructionsDir, unreadablePaths).sort((a, b) => a.localeCompare(b));
 
   for (const relativePath of instructionFiles) {
+    const sourcePath = path.resolve(instructionsDir, relativePath);
     let raw: string;
     try {
-      raw = fs.readFileSync(path.join(instructionsDir, relativePath), "utf8");
+      raw = fs.readFileSync(sourcePath, "utf8");
     } catch {
       unreadablePaths.push(relativePath);
       continue;
@@ -75,24 +76,30 @@ function scanInstructions(instructionsDir: string): InstructionScanResult {
 
     const content = stripFrontmatter(raw).trim();
     if (content) {
-      loaded.push({ relativePath, content });
+      loaded.push({ sourcePath, content });
     }
   }
 
   return { loaded, unreadablePaths, directoryMissing: false };
 }
 
+function escapeXmlAttribute(value: string): string {
+  return value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
 function formatInstructions(instructions: LoadedInstruction[]): string {
   return instructions
     .map(
-      ({ relativePath, content }) =>
-        `Instructions from Water extension: ${relativePath}\n<INSTRUCTIONS>\n${content}\n</INSTRUCTIONS>`,
+      ({ sourcePath, content }) =>
+        `<personal_instructions source="${escapeXmlAttribute(sourcePath)}">
+${content}
+</personal_instructions>`,
     )
     .join("\n\n");
 }
 
 export default function instructionsExtension(pi: ExtensionAPI, options: InstructionsExtensionOptions = {}) {
-  const instructionsDir = options.instructionsDir ?? bundledInstructionsDir;
+  const instructionsDir = path.resolve(options.instructionsDir ?? bundledInstructionsDir);
   let instructions: LoadedInstruction[] = [];
 
   pi.on("session_start", async (_event, ctx) => {
@@ -121,11 +128,13 @@ export default function instructionsExtension(pi: ExtensionAPI, options: Instruc
         event.systemPrompt +
         `
 
-## Shared Instructions
+<personal_context>
 
-The Water extension provides the following shared instructions. Follow them in addition to the existing system instructions.
+Personal-specific instructions and guidelines:
 
 ${formatInstructions(instructions)}
+
+</personal_context>
 `,
     };
   });
