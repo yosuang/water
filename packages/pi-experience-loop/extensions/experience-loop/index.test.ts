@@ -74,7 +74,14 @@ function loadExtension(learningsDir: string, branch: unknown[] = []) {
 }
 
 function expandedCapturePrompt(): string {
-  const skillPath = resolve(dirname(fileURLToPath(import.meta.url)), "..", "skills", "capture-learning", "SKILL.md");
+  const skillPath = resolve(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "..",
+    "skills",
+    "capture-learning",
+    "SKILL.md",
+  );
   return `<skill name="capture-learning" location="${skillPath}">\nCapture one durable learning\n</skill>`;
 }
 

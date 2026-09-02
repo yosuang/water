@@ -7,17 +7,17 @@
     "pi-package"
   ],
   "files": [
-    "src/index.ts",
-    "src/learning-loop.ts",
+    "extensions/*/index.ts",
+    "extensions/*/learning-loop.ts",
     "skills",
     "README.md"
   ],
   "scripts": {
-    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test src/index.test.ts"
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test extensions/experience-loop/index.test.ts"
   },
   "pi": {
     "extensions": [
-      "./src/index.ts"
+      "./extensions"
     ],
     "skills": [
       "./skills"

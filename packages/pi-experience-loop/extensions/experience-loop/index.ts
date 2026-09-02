@@ -21,8 +21,10 @@ const STATE_ENTRY_TYPE = "water-experience-loop-state";
 const PACKAGE_CONFIG_NAME = "pi-experience-loop";
 const PACKAGE_CONFIG_VERSION = 1;
 const MAX_RECALL_CONTEXT_LENGTH = 1_200;
+// Resolved from extensions/experience-loop/ up to the package root, where the required skill is bundled.
 const CAPTURE_SKILL_PATH = resolve(
   dirname(fileURLToPath(import.meta.url)),
+  "..",
   "..",
   "skills",
   "capture-learning",

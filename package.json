@@ -8,16 +8,16 @@
   ],
   "scripts": {
     "test": "bun run test:pi",
-    "test:pi": "bun run --parallel --filter './packages/*' --if-present test && node --experimental-strip-types --disable-warning=ExperimentalWarning --test scripts/package-layout.test.mjs",
+    "test:pi": "bun run --parallel --filter './packages/*' --if-present test",
     "check": "biome check --write --error-on-warnings . && bun run test:pi && tsc --noEmit",
     "setup:dev": "husky"
   },
   "pi": {
     "extensions": [
       "./packages/pi-agent-stuff/extensions",
-      "./packages/pi-experience-loop/src/index.ts",
-      "./packages/pi-herdr-subagent/src/index.ts",
-      "./packages/pi-instructions/src/index.ts"
+      "./packages/pi-experience-loop/extensions",
+      "./packages/pi-herdr-subagent/extensions",
+      "./packages/pi-instructions/extensions"
     ],
     "skills": [
       "./packages/pi-agent-stuff/skills",

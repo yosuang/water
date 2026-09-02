@@ -7,16 +7,16 @@
     "pi-package"
   ],
   "files": [
-    "src/index.ts",
+    "extensions/*/index.ts",
     "instructions",
     "README.md"
   ],
   "scripts": {
-    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test src/index.test.ts"
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test extensions/instructions/index.test.ts"
   },
   "pi": {
     "extensions": [
-      "./src/index.ts"
+      "./extensions"
     ]
   },
   "dependencies": {

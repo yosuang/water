@@ -33,7 +33,8 @@ type InstructionsConfig = {
 
 const PACKAGE_CONFIG_NAME = "pi-instructions";
 const PACKAGE_CONFIG_VERSION = 1;
-const bundledInstructionsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "instructions");
+// Resolved from extensions/instructions/ up to the package root, where the Markdown instructions are bundled.
+const bundledInstructionsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "instructions");
 
 function decodeInstructionsConfig(value: unknown, context: ConfigDecodeContext): InstructionsConfig {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("section must be an object");
