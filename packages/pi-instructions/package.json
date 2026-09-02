@@ -1,0 +1,33 @@
+{
+  "name": "pi-instructions",
+  "version": "0.1.0",
+  "description": "Load Water's shared personal instructions into Pi.",
+  "type": "module",
+  "keywords": [
+    "pi-package"
+  ],
+  "files": [
+    "src/index.ts",
+    "instructions",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test src/index.test.ts"
+  },
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  },
+  "dependencies": {
+    "@water/config": "catalog:",
+    "@water/shared": "catalog:"
+  },
+  "bundledDependencies": [
+    "@water/config",
+    "@water/shared"
+  ],
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "catalog:"
+  }
+}

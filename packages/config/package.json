@@ -1,0 +1,13 @@
+{
+  "name": "@water/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "files": [
+    "src/index.ts"
+  ],
+  "scripts": {
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test src/index.test.ts"
+  }
+}

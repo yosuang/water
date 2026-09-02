@@ -1,32 +1,55 @@
 {
   "name": "water",
+  "private": true,
   "description": "Personal configuration for a consistent AI coding agent experience across Claude Code, Codex, Pi, OpenCode, and more.",
   "type": "module",
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "catalog": {
+      "@biomejs/biome": "2.5.4",
+      "@earendil-works/pi-ai": "0.84.4",
+      "@earendil-works/pi-coding-agent": "0.84.4",
+      "@earendil-works/pi-tui": "0.84.4",
+      "@types/node": "^24.10.0",
+      "@water/config": "0.1.0",
+      "@water/shared": "0.1.0",
+      "husky": "^9.1.7",
+      "typescript": "^7.0.2"
+    }
+  },
   "scripts": {
-    "test": "npm run test:pi",
-    "test:pi": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test pi/extensions/*/index.test.ts",
-    "check": "biome check --write --error-on-warnings . && npm run test:pi && tsc --noEmit --skipLibCheck --allowImportingTsExtensions pi/extensions/*/*.ts",
+    "test": "bun run test:pi",
+    "test:pi": "bun run --parallel --filter './packages/*' --if-present test && node --experimental-strip-types --disable-warning=ExperimentalWarning --test scripts/package-layout.test.mjs",
+    "check": "biome check --write --error-on-warnings . && bun run test:pi && tsc --noEmit",
     "setup:dev": "husky"
   },
   "pi": {
     "extensions": [
-      "./pi/extensions"
+      "./packages/pi-agent-stuff/extensions",
+      "./packages/pi-experience-loop/src/index.ts",
+      "./packages/pi-herdr-subagent/src/index.ts",
+      "./packages/pi-instructions/src/index.ts"
     ],
     "skills": [
-      "./pi/skills"
+      "./packages/pi-agent-stuff/skills",
+      "./packages/pi-experience-loop/skills",
+      "./packages/pi-herdr-subagent/skills"
     ]
   },
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": ">=0.84.2",
-    "@earendil-works/pi-ai": ">=0.50.0",
-    "@earendil-works/pi-tui": ">=0.50.0"
+    "@earendil-works/pi-ai": "catalog:",
+    "@earendil-works/pi-coding-agent": "catalog:",
+    "@earendil-works/pi-tui": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.4",
-    "@earendil-works/pi-ai": "0.84.4",
-    "@earendil-works/pi-coding-agent": "0.84.4",
-    "@earendil-works/pi-tui": "0.84.4",
-    "typescript": "^7.0.2",
-    "husky": "^9.1.7"
+    "@biomejs/biome": "catalog:",
+    "@earendil-works/pi-ai": "catalog:",
+    "@earendil-works/pi-coding-agent": "catalog:",
+    "@earendil-works/pi-tui": "catalog:",
+    "@types/node": "catalog:",
+    "husky": "catalog:",
+    "typescript": "catalog:"
   }
 }

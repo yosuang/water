@@ -1,0 +1,35 @@
+{
+  "name": "pi-experience-loop",
+  "version": "0.1.0",
+  "description": "Capture and recall user-approved learnings in Pi.",
+  "type": "module",
+  "keywords": [
+    "pi-package"
+  ],
+  "files": [
+    "src/index.ts",
+    "src/learning-loop.ts",
+    "skills",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test src/index.test.ts"
+  },
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ],
+    "skills": [
+      "./skills"
+    ]
+  },
+  "dependencies": {
+    "@water/config": "catalog:"
+  },
+  "bundledDependencies": [
+    "@water/config"
+  ],
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "catalog:"
+  }
+}

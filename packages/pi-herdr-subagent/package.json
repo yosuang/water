@@ -1,0 +1,30 @@
+{
+  "name": "pi-herdr-subagent",
+  "version": "0.1.0",
+  "description": "Model-aware Herdr subagent orchestration for Pi.",
+  "type": "module",
+  "keywords": [
+    "pi-package"
+  ],
+  "files": [
+    "src/index.ts",
+    "skills",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test src/index.test.ts"
+  },
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ],
+    "skills": [
+      "./skills"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "catalog:",
+    "@earendil-works/pi-coding-agent": "catalog:",
+    "@earendil-works/pi-tui": "catalog:"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "pi-agent-stuff",
+  "version": "0.1.0",
+  "description": "Small, general-purpose Pi extensions and skills from Water.",
+  "type": "module",
+  "keywords": [
+    "pi-package"
+  ],
+  "files": [
+    "extensions/*/index.ts",
+    "extensions/*/README.md",
+    "extensions/prompt-stash/CONTEXT.md",
+    "extensions/prompt-stash/docs",
+    "skills",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test extensions/add-dir/index.test.ts extensions/claude-rules/index.test.ts extensions/prompt-stash/index.test.ts skills/handoff-herdr/scripts/send-handoff.test.mjs"
+  },
+  "pi": {
+    "extensions": [
+      "./extensions"
+    ],
+    "skills": [
+      "./skills"
+    ]
+  },
+  "dependencies": {
+    "@water/shared": "catalog:"
+  },
+  "bundledDependencies": [
+    "@water/shared"
+  ],
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "catalog:",
+    "@earendil-works/pi-tui": "catalog:"
+  }
+}

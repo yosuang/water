@@ -35,7 +35,8 @@
   },
   "files": {
     "includes": [
-      "pi/extensions/**/*.ts"
+      "packages/**/*.{ts,mjs}",
+      "scripts/**/*.mjs"
     ]
   }
 }

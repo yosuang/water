@@ -3,7 +3,9 @@
 ## Repository Map
 
 - `COMPATIBILITY.md`: Active temporary constraints for external tools; consult it when adding or removing compatibility-driven rules.
-- `pi/prompts/`: Pi prompt templates / slash commands exported through `package.json` `pi.prompts`; add reusable command prompts here.
-- `pi/extensions/`: Pi TypeScript extensions exported through `package.json` `pi.extensions`.
-- `pi/skills/`: Pi skills exported through `package.json` `pi.skills`.
-- `pi/themes/`: Pi themes exported through `package.json` `pi.themes`.
+- `packages/pi-agent-stuff/`: Small general-purpose Pi extensions plus standalone skills.
+- `packages/pi-experience-loop/`: Experience-loop extension and its required `capture-learning` skill.
+- `packages/pi-herdr-subagent/`: Herdr extension and its required `herdr-subagent` skill.
+- `packages/pi-instructions/`: Shared-instructions extension and its bundled Markdown instructions.
+- `packages/config/`: Private loader for sections in Pi config home's `pi-water.json`.
+- `packages/shared/`: Private runtime helpers reused across Pi packages.
