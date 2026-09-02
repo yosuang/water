@@ -20,14 +20,14 @@
     ]
   },
   "dependencies": {
-    "@water/config": "catalog:",
-    "@water/shared": "catalog:"
+    "@water/config": "*",
+    "@water/shared": "*"
   },
   "bundledDependencies": [
     "@water/config",
     "@water/shared"
   ],
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "catalog:"
+    "@earendil-works/pi-coding-agent": "*"
   }
 }

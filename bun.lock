@@ -5,18 +5,18 @@
     "": {
       "name": "water",
       "devDependencies": {
-        "@biomejs/biome": "catalog:",
-        "@earendil-works/pi-ai": "catalog:",
-        "@earendil-works/pi-coding-agent": "catalog:",
-        "@earendil-works/pi-tui": "catalog:",
-        "@types/node": "catalog:",
-        "husky": "catalog:",
-        "typescript": "catalog:",
+        "@biomejs/biome": "2.5.4",
+        "@earendil-works/pi-ai": "0.84.4",
+        "@earendil-works/pi-coding-agent": "0.84.4",
+        "@earendil-works/pi-tui": "0.84.4",
+        "@types/node": "^24.10.0",
+        "husky": "^9.1.7",
+        "typescript": "^7.0.2",
       },
       "peerDependencies": {
-        "@earendil-works/pi-ai": "catalog:",
-        "@earendil-works/pi-coding-agent": "catalog:",
-        "@earendil-works/pi-tui": "catalog:",
+        "@earendil-works/pi-ai": "*",
+        "@earendil-works/pi-coding-agent": "*",
+        "@earendil-works/pi-tui": "*",
       },
     },
     "packages/config": {
@@ -27,58 +27,47 @@
       "name": "pi-agent-stuff",
       "version": "0.1.0",
       "dependencies": {
-        "@water/shared": "catalog:",
+        "@water/shared": "*",
       },
       "peerDependencies": {
-        "@earendil-works/pi-coding-agent": "catalog:",
-        "@earendil-works/pi-tui": "catalog:",
+        "@earendil-works/pi-coding-agent": "*",
+        "@earendil-works/pi-tui": "*",
       },
     },
     "packages/pi-experience-loop": {
       "name": "pi-experience-loop",
       "version": "0.1.0",
       "dependencies": {
-        "@water/config": "catalog:",
+        "@water/config": "*",
       },
       "peerDependencies": {
-        "@earendil-works/pi-coding-agent": "catalog:",
+        "@earendil-works/pi-coding-agent": "*",
       },
     },
     "packages/pi-herdr-subagent": {
       "name": "pi-herdr-subagent",
       "version": "0.1.0",
       "peerDependencies": {
-        "@earendil-works/pi-ai": "catalog:",
-        "@earendil-works/pi-coding-agent": "catalog:",
-        "@earendil-works/pi-tui": "catalog:",
+        "@earendil-works/pi-ai": "*",
+        "@earendil-works/pi-coding-agent": "*",
+        "@earendil-works/pi-tui": "*",
       },
     },
     "packages/pi-instructions": {
       "name": "pi-instructions",
       "version": "0.1.0",
       "dependencies": {
-        "@water/config": "catalog:",
-        "@water/shared": "catalog:",
+        "@water/config": "*",
+        "@water/shared": "*",
       },
       "peerDependencies": {
-        "@earendil-works/pi-coding-agent": "catalog:",
+        "@earendil-works/pi-coding-agent": "*",
       },
     },
     "packages/shared": {
       "name": "@water/shared",
       "version": "0.1.0",
     },
-  },
-  "catalog": {
-    "@biomejs/biome": "2.5.4",
-    "@earendil-works/pi-ai": "0.84.4",
-    "@earendil-works/pi-coding-agent": "0.84.4",
-    "@earendil-works/pi-tui": "0.84.4",
-    "@types/node": "^24.10.0",
-    "@water/config": "0.1.0",
-    "@water/shared": "0.1.0",
-    "husky": "^9.1.7",
-    "typescript": "^7.0.2",
   },
   "packages": {
     "@anthropic-ai/sdk": ["@anthropic-ai/sdk@0.91.1", "", { "dependencies": { "json-schema-to-ts": "^3.1.1" }, "peerDependencies": { "zod": "^3.25.0 || ^4.0.0" }, "optionalPeers": ["zod"], "bin": { "anthropic-ai-sdk": "bin/cli" } }, "sha512-LAmu761tSN9r66ixvmciswUj/ZC+1Q4iAfpedTfSVLeswRwnY3n2Nb6Tsk+cLPP28aLOPWeMgIuTuCcMC6W/iw=="],

@@ -24,12 +24,12 @@
     ]
   },
   "dependencies": {
-    "@water/config": "catalog:"
+    "@water/config": "*"
   },
   "bundledDependencies": [
     "@water/config"
   ],
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "catalog:"
+    "@earendil-works/pi-coding-agent": "*"
   }
 }

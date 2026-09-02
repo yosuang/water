@@ -26,13 +26,13 @@
     ]
   },
   "dependencies": {
-    "@water/shared": "catalog:"
+    "@water/shared": "*"
   },
   "bundledDependencies": [
     "@water/shared"
   ],
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "catalog:",
-    "@earendil-works/pi-tui": "catalog:"
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
   }
 }

@@ -30,7 +30,7 @@ function assertResourcePaths(packageDir, manifest) {
 
 test("the root and four public Pi package manifests expose existing resources", () => {
   assert.deepEqual(
-    rootManifest.workspaces.packages,
+    rootManifest.workspaces,
     ["packages/*"],
     "the workspace package glob is the monorepo ownership seam",
   );
@@ -43,15 +43,39 @@ test("the root and four public Pi package manifests expose existing resources", 
   }
 });
 
-test("workspace dependency versions come from the Bun catalog", () => {
-  const catalog = rootManifest.workspaces.catalog;
+test("workspace dependency versions stay npm-installable and consistent", () => {
   const manifests = [rootManifest, ...["config", "shared", ...packageNames].map((name) => manifestFor(name).manifest)];
+  const pinnedCoreVersions = new Map();
 
   for (const manifest of manifests) {
     for (const dependencyType of ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"]) {
       for (const [dependencyName, version] of Object.entries(manifest[dependencyType] ?? {})) {
-        assert.equal(version, "catalog:", `${manifest.name} ${dependencyName} must use the default Bun catalog`);
-        assert.equal(typeof catalog[dependencyName], "string", `${dependencyName} is missing from the Bun catalog`);
+        assert.notEqual(
+          version,
+          "catalog:",
+          `${manifest.name} ${dependencyName} must not use Bun's catalog: protocol; Pi installs git packages with npm`,
+        );
+        if (dependencyName.startsWith("@water/")) {
+          assert.equal(
+            version,
+            "*",
+            `${manifest.name} ${dependencyName} must reference the workspace package with "*"`,
+          );
+        }
+        if (dependencyName.startsWith("@earendil-works/") && dependencyType === "peerDependencies") {
+          assert.equal(version, "*", `${manifest.name} ${dependencyName} must stay "*" so Pi bundles the core package`);
+        }
+        if (dependencyName.startsWith("@earendil-works/") && dependencyType !== "peerDependencies") {
+          const previous = pinnedCoreVersions.get(dependencyName);
+          if (previous) {
+            assert.equal(
+              version,
+              previous,
+              `${dependencyName} is ${version} in ${manifest.name} but ${previous} elsewhere`,
+            );
+          }
+          pinnedCoreVersions.set(dependencyName, version);
+        }
       }
     }
   }

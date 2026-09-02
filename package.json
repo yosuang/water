@@ -3,22 +3,9 @@
   "private": true,
   "description": "Personal configuration for a consistent AI coding agent experience across Claude Code, Codex, Pi, OpenCode, and more.",
   "type": "module",
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ],
-    "catalog": {
-      "@biomejs/biome": "2.5.4",
-      "@earendil-works/pi-ai": "0.84.4",
-      "@earendil-works/pi-coding-agent": "0.84.4",
-      "@earendil-works/pi-tui": "0.84.4",
-      "@types/node": "^24.10.0",
-      "@water/config": "0.1.0",
-      "@water/shared": "0.1.0",
-      "husky": "^9.1.7",
-      "typescript": "^7.0.2"
-    }
-  },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "test": "bun run test:pi",
     "test:pi": "bun run --parallel --filter './packages/*' --if-present test && node --experimental-strip-types --disable-warning=ExperimentalWarning --test scripts/package-layout.test.mjs",
@@ -39,17 +26,17 @@
     ]
   },
   "peerDependencies": {
-    "@earendil-works/pi-ai": "catalog:",
-    "@earendil-works/pi-coding-agent": "catalog:",
-    "@earendil-works/pi-tui": "catalog:"
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@earendil-works/pi-ai": "catalog:",
-    "@earendil-works/pi-coding-agent": "catalog:",
-    "@earendil-works/pi-tui": "catalog:",
-    "@types/node": "catalog:",
-    "husky": "catalog:",
-    "typescript": "catalog:"
+    "@biomejs/biome": "2.5.4",
+    "@earendil-works/pi-ai": "0.84.4",
+    "@earendil-works/pi-coding-agent": "0.84.4",
+    "@earendil-works/pi-tui": "0.84.4",
+    "@types/node": "^24.10.0",
+    "husky": "^9.1.7",
+    "typescript": "^7.0.2"
   }
 }
