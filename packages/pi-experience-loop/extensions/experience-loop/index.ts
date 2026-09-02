@@ -1,6 +1,7 @@
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { Box, Text } from "@earendil-works/pi-tui";
 import {
   type ConfigDecodeContext,
   ensureWaterProjectDirectory,
@@ -8,10 +9,13 @@ import {
   reportConfigDiagnostics,
 } from "@water/config";
 import {
+  type ExperienceHintEntry,
   type ExperienceStateEntry,
   evaluateSessionFriction,
   frictionHint,
+  frictionReasons,
   hasAssistantResponse,
+  hintWidgetLines,
   isCorrectionPrompt,
   type LearningCard,
   type LearningSearchResult,
@@ -23,6 +27,8 @@ import {
 } from "./learning-loop.ts";
 
 const STATE_ENTRY_TYPE = "water-experience-loop-state";
+const HINT_ENTRY_TYPE = "water-experience-hint";
+const HINT_WIDGET_KEY = "water-experience-hint";
 const PACKAGE_CONFIG_NAME = "pi-experience-loop";
 const PACKAGE_CONFIG_VERSION = 1;
 const MAX_RECALL_CONTEXT_LENGTH = 1_200;
@@ -121,7 +127,45 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
   let availableCaptureGrants = 0;
   let beforeAgentUserPrompt: string | undefined;
   let pendingCaptureRequests = 0;
+  let hintWidgetVisible = false;
   const queuedRecallContexts: string[] = [];
+
+  // The hint entry is invisible without a renderer, so register one for TUI transcripts.
+  pi.registerEntryRenderer<ExperienceHintEntry>(HINT_ENTRY_TYPE, (entry, { expanded }, theme) => {
+    const friction = entry.data?.friction;
+    if (!friction || typeof friction.score !== "number") return undefined;
+    const reason = frictionReasons(friction).join(" and ") || "friction";
+    const box = new Box(1, 1, (text) => theme.bg("customMessageBg", text));
+    box.addChild(
+      new Text(
+        `${theme.fg("customMessageLabel", theme.bold("Experience worth capturing"))} ${theme.fg(
+          "dim",
+          `(friction score ${friction.score})`,
+        )}`,
+        0,
+        0,
+      ),
+    );
+    box.addChild(
+      new Text(theme.fg("customMessageText", `This branch contained ${reason} after substantive work.`), 0, 0),
+    );
+    box.addChild(
+      new Text(theme.fg("customMessageText", "Run /skill:capture-learning to preserve the reusable lesson."), 0, 0),
+    );
+    if (expanded) {
+      box.addChild(
+        new Text(
+          theme.fg(
+            "dim",
+            `tool calls ${friction.toolCount}; tool errors ${friction.toolError}; interrupts ${friction.interrupt}; corrections ${friction.correction}; unique tools ${friction.uniqueTools}`,
+          ),
+          0,
+          0,
+        ),
+      );
+    }
+    return box;
+  });
 
   const recordRecall = (results: LearningSearchResult[]): string => {
     pi.appendEntry(STATE_ENTRY_TYPE, {
@@ -150,7 +194,10 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
     availableCaptureGrants = 0;
     beforeAgentUserPrompt = undefined;
     pendingCaptureRequests = 0;
+    hintWidgetVisible = false;
     queuedRecallContexts.length = 0;
+    // A widget from the previous runtime instance (reload/session switch) may still be on screen.
+    if (ctx.mode === "tui") ctx.ui.setWidget(HINT_WIDGET_KEY, undefined);
     try {
       await ensureWaterProjectDirectory(ctx.cwd);
       const result = await store.reload();
@@ -172,6 +219,11 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
 
   pi.on("input", (event, ctx) => {
     if (event.source === "extension") return;
+    // The widget did its job once the user starts acting again.
+    if (hintWidgetVisible && ctx.mode === "tui") {
+      hintWidgetVisible = false;
+      ctx.ui.setWidget(HINT_WIDGET_KEY, undefined);
+    }
     if (event.streamingBehavior === "steer") {
       pi.appendEntry(STATE_ENTRY_TYPE, {
         kind: "interrupt",
@@ -254,6 +306,13 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
       kind: "hinted",
       timestamp: now().getTime(),
     } satisfies ExperienceStateEntry);
+    pi.appendEntry(HINT_ENTRY_TYPE, { friction } satisfies ExperienceHintEntry);
+
+    if (ctx.mode === "tui") {
+      hintWidgetVisible = true;
+      ctx.ui.setWidget(HINT_WIDGET_KEY, hintWidgetLines(friction));
+      return;
+    }
     ctx.ui.notify(frictionHint(friction), "info");
   });
 

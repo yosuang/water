@@ -67,6 +67,11 @@ export type SessionFriction = {
   uniqueTools: number;
 };
 
+/** Data persisted in the visible hint entry rendered inside the transcript. */
+export type ExperienceHintEntry = {
+  friction: SessionFriction;
+};
+
 type IndexedLearning = LearningSearchResult & {
   bodyTokens: Set<string>;
   tagTokens: Set<string>;
@@ -376,13 +381,22 @@ export function evaluateSessionFriction(branch: unknown[], stateEntryType: strin
   };
 }
 
-export function frictionHint(friction: SessionFriction): string {
+export function frictionReasons(friction: SessionFriction): string[] {
   const reasons: string[] = [];
   if (friction.interrupt > 0) reasons.push("an interruption");
   if (friction.correction > 0) reasons.push("a correction");
   if (friction.toolError >= 3) reasons.push("repeated tool errors");
-  const reason = reasons.join(" and ") || "friction";
+  return reasons;
+}
+
+export function frictionHint(friction: SessionFriction): string {
+  const reason = frictionReasons(friction).join(" and ") || "friction";
   return `This branch contained ${reason} after substantive work. Run /skill:capture-learning to preserve the reusable lesson.`;
+}
+
+export function hintWidgetLines(friction: SessionFriction): string[] {
+  const reason = frictionReasons(friction).join(" and ") || "friction";
+  return [`Capturable experience (${reason}): run /skill:capture-learning`];
 }
 
 export function shouldHintForLearning(friction: SessionFriction): boolean {
