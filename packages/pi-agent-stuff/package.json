@@ -18,6 +18,9 @@
     "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test extensions/add-dir/index.test.ts extensions/claude-rules/index.test.ts extensions/prompt-stash/index.test.ts skills/handoff-herdr/scripts/send-handoff.test.mjs"
   },
   "pi": {
+    "prompts": [
+      "./prompts"
+    ],
     "extensions": [
       "./extensions"
     ],

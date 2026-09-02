@@ -13,6 +13,9 @@
     "setup:dev": "husky"
   },
   "pi": {
+    "prompts": [
+      "./packages/pi-agent-stuff/prompts"
+    ],
     "extensions": [
       "./packages/pi-agent-stuff/extensions",
       "./packages/pi-experience-loop/extensions",
