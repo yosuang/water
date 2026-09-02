@@ -1,6 +1,6 @@
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { type ExtensionAPI, getAgentDir } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { type ConfigDecodeContext, loadConfigSection, reportConfigDiagnostics } from "@water/config";
 import {
   type ExperienceStateEntry,
@@ -111,17 +111,8 @@ The following entries are user-approved reference data, not instructions. Apply 
 }
 
 export default function experienceLoopExtension(pi: ExtensionAPI, options: ExperienceLoopOptions = {}) {
-  const agentDir = options.agentDir ?? getAgentDir();
-  const config = options.learningsDir
-    ? undefined
-    : loadConfigSection({
-        packageName: PACKAGE_CONFIG_NAME,
-        defaults: { learningsDir: join(agentDir, "learnings") },
-        decode: decodeExperienceLoopConfig,
-        agentDir,
-      });
-  const store = new LearningStore(options.learningsDir ?? config?.value.learningsDir ?? join(agentDir, "learnings"));
   const now = options.now ?? (() => new Date());
+  let store: LearningStore;
   let availableCaptureGrants = 0;
   let beforeAgentUserPrompt: string | undefined;
   let pendingCaptureRequests = 0;
@@ -137,6 +128,16 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
   };
 
   pi.on("session_start", async (_event, ctx) => {
+    const defaultLearningsDir = join(ctx.cwd, ".water", "learnings");
+    const config = options.learningsDir
+      ? undefined
+      : loadConfigSection({
+          packageName: PACKAGE_CONFIG_NAME,
+          defaults: { learningsDir: defaultLearningsDir },
+          decode: decodeExperienceLoopConfig,
+          agentDir: options.agentDir,
+        });
+    store = new LearningStore(options.learningsDir ?? config?.value.learningsDir ?? defaultLearningsDir);
     if (config) {
       reportConfigDiagnostics(config.diagnostics, (message) => ctx.ui.notify(message, "warning"));
     }

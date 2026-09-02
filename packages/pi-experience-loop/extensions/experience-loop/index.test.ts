@@ -18,7 +18,11 @@ type RegisteredTool = {
   ) => Promise<any>;
 };
 
-function loadExtension(learningsDir: string, branch: unknown[] = []) {
+function loadExtension(
+  learningsDir: string | undefined,
+  branch: unknown[] = [],
+  runtime: { agentDir?: string; cwd?: string } = {},
+) {
   const handlers = new Map<string, EventHandler[]>();
   const entries: Array<{ type: "custom"; customType: string; data: unknown }> = [];
   const notifications: Array<{ message: string; level: string }> = [];
@@ -39,13 +43,14 @@ function loadExtension(learningsDir: string, branch: unknown[] = []) {
       },
     } as any,
     {
-      learningsDir,
+      ...(runtime.agentDir !== undefined ? { agentDir: runtime.agentDir } : {}),
+      ...(learningsDir !== undefined ? { learningsDir } : {}),
       now: () => new Date("2026-08-31T10:00:00.000Z"),
     },
   );
 
   const ctx = {
-    cwd: "/project",
+    cwd: runtime.cwd ?? "/project",
     hasUI: true,
     sessionManager: {
       getBranch: () => [...branch, ...entries],
@@ -116,9 +121,43 @@ function assistantWithToolCalls(count: number): unknown {
   };
 }
 
+test("saves learnings to .water/learnings in the current session project by default", async () => {
+  const rootDir = mkdtempSync(join(tmpdir(), "water-experience-default-"));
+  const agentDir = join(rootDir, "agent");
+  const projectDir = join(rootDir, "project");
+
+  try {
+    const extension = loadExtension(undefined, [], { agentDir, cwd: projectDir });
+    await extension.getHandler("session_start")({}, extension.ctx);
+    await authorizeCapture(extension);
+    await extension.getSaveTool().execute(
+      "call-default-path",
+      {
+        title: "Keep project learnings local",
+        tags: ["storage", "project-scope"],
+        applicability: "A session captures reusable guidance for its current project.",
+        lesson: "Store the learning with the project that owns its context.",
+        rationale: "Project-local storage keeps unrelated project knowledge isolated.",
+        verification: "Confirm the learning file appears under the current project's learning directory.",
+        limitations: "Use an explicit configured directory when learnings should be shared across projects.",
+      },
+      undefined,
+      undefined,
+      extension.ctx,
+    );
+
+    assert.deepEqual(readdirSync(join(projectDir, ".water", "learnings")), [
+      "2026-08-31-keep-project-learnings-local.md",
+    ]);
+    assert.equal(existsSync(join(agentDir, "learnings")), false);
+  } finally {
+    rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
 test("uses the learning directory configured in pi-water.json", async () => {
   const agentDir = mkdtempSync(join(tmpdir(), "water-experience-config-"));
-  const handlers = new Map<string, EventHandler>();
+  const projectDir = join(agentDir, "project");
 
   try {
     writeFileSync(
@@ -133,29 +172,11 @@ test("uses the learning directory configured in pi-water.json", async () => {
         },
       }),
     );
-    experienceLoopExtension(
-      {
-        appendEntry() {},
-        on(name: string, handler: EventHandler) {
-          handlers.set(name, handler);
-        },
-        registerTool() {},
-      } as any,
-      { agentDir },
-    );
-
-    const sessionStart = handlers.get("session_start");
-    assert.ok(sessionStart);
-    await sessionStart(
-      {},
-      {
-        hasUI: true,
-        ui: { notify() {} },
-      },
-    );
+    const extension = loadExtension(undefined, [], { agentDir, cwd: projectDir });
+    await extension.getHandler("session_start")({}, extension.ctx);
 
     assert.equal(existsSync(join(agentDir, "custom-learnings")), true);
-    assert.equal(existsSync(join(agentDir, "learnings")), false);
+    assert.equal(existsSync(join(projectDir, ".water", "learnings")), false);
   } finally {
     rmSync(agentDir, { recursive: true, force: true });
   }

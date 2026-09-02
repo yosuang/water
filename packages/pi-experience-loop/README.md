@@ -4,7 +4,7 @@
 
 ## 闭环
 
-1. `session_start` 加载 `getAgentDir()/learnings/*.md`。
+1. `session_start` 加载当前会话项目目录下的 `.water/learnings/*.md`。
 2. `before_agent_start` 对空闲时提交的任务做本地 IDF 加权词法检索；queued steer/followUp 在 user `message_end` 检索，并在下一次 `context` 注入。相关结果最多 3 条、每组不超过 1200 字符。
 3. `input` 记录用户纠正和 streaming steer，不保存输入文本。
 4. `agent_settled` 从当前 session branch 统计工具调用、错误和打断；达到门槛后提示一次 `/skill:capture-learning`。
@@ -24,10 +24,10 @@ Pi 没有通用的工具拒绝事件，因此不统计 TeamAI 的 `toolReject` �
 
 ## 存储和召回
 
-默认目录是 `getAgentDir()/learnings`，因此会遵循 `PI_CODING_AGENT_DIR`。一条经验一个 Markdown 文件：
+默认目录是当前会话工作目录（`ctx.cwd`）下的 `.water/learnings`，不同项目各自维护经验。一条经验一个 Markdown 文件：
 
 ```text
-<agent-dir>/learnings/
+<project>/.water/learnings/
 └── 2026-08-31-queue-complete-file-mutations.md
 ```
 
