@@ -1,7 +1,12 @@
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { type ConfigDecodeContext, loadConfigSection, reportConfigDiagnostics } from "@water/config";
+import {
+  type ConfigDecodeContext,
+  ensureWaterProjectDirectory,
+  loadConfigSection,
+  reportConfigDiagnostics,
+} from "@water/config";
 import {
   type ExperienceStateEntry,
   evaluateSessionFriction,
@@ -137,7 +142,8 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
           decode: decodeExperienceLoopConfig,
           agentDir: options.agentDir,
         });
-    store = new LearningStore(options.learningsDir ?? config?.value.learningsDir ?? defaultLearningsDir);
+    const learningsDir = options.learningsDir ?? config?.value.learningsDir ?? defaultLearningsDir;
+    store = new LearningStore(learningsDir);
     if (config) {
       reportConfigDiagnostics(config.diagnostics, (message) => ctx.ui.notify(message, "warning"));
     }
@@ -146,6 +152,7 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
     pendingCaptureRequests = 0;
     queuedRecallContexts.length = 0;
     try {
+      await ensureWaterProjectDirectory(ctx.cwd);
       const result = await store.reload();
       if (ctx.hasUI && result.skipped > 0) {
         ctx.ui.notify(

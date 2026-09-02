@@ -7,5 +7,5 @@
 - `packages/pi-experience-loop/`: Experience-loop extension and its required `capture-learning` skill.
 - `packages/pi-herdr-subagent/`: Herdr extension and its required `herdr-subagent` skill.
 - `packages/pi-instructions/`: Shared-instructions extension and its bundled Markdown instructions.
-- `packages/config/`: Private loader for sections in Pi config home's `pi-water.json`.
+- `packages/config/`: Private shared module for Water configuration and project-directory initialization.
 - `packages/shared/`: Private runtime helpers reused across Pi packages.

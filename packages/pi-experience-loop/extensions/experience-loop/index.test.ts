@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import test from "node:test";
@@ -146,9 +146,9 @@ test("saves learnings to .water/learnings in the current session project by defa
       extension.ctx,
     );
 
-    assert.deepEqual(readdirSync(join(projectDir, ".water", "learnings")), [
-      "2026-08-31-keep-project-learnings-local.md",
-    ]);
+    const learningsDir = join(projectDir, ".water", "learnings");
+    assert.deepEqual(readdirSync(learningsDir), ["2026-08-31-keep-project-learnings-local.md"]);
+    assert.equal(readFileSync(join(projectDir, ".water", ".gitignore"), "utf8"), "*\n");
     assert.equal(existsSync(join(agentDir, "learnings")), false);
   } finally {
     rmSync(rootDir, { recursive: true, force: true });
@@ -176,9 +176,29 @@ test("uses the learning directory configured in pi-water.json", async () => {
     await extension.getHandler("session_start")({}, extension.ctx);
 
     assert.equal(existsSync(join(agentDir, "custom-learnings")), true);
+    assert.equal(readFileSync(join(projectDir, ".water", ".gitignore"), "utf8"), "*\n");
     assert.equal(existsSync(join(projectDir, ".water", "learnings")), false);
   } finally {
     rmSync(agentDir, { recursive: true, force: true });
+  }
+});
+
+test("preserves an existing project Water gitignore", async () => {
+  const rootDir = mkdtempSync(join(tmpdir(), "water-experience-gitignore-"));
+  const agentDir = join(rootDir, "agent");
+  const projectDir = join(rootDir, "project");
+  const waterDir = join(projectDir, ".water");
+  const existing = "# managed by the project\n!.gitkeep\n";
+
+  try {
+    mkdirSync(waterDir, { recursive: true });
+    writeFileSync(join(waterDir, ".gitignore"), existing, "utf8");
+    const extension = loadExtension(undefined, [], { agentDir, cwd: projectDir });
+    await extension.getHandler("session_start")({}, extension.ctx);
+
+    assert.equal(readFileSync(join(waterDir, ".gitignore"), "utf8"), existing);
+  } finally {
+    rmSync(rootDir, { recursive: true, force: true });
   }
 });
 

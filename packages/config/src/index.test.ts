@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { loadConfigSection, reportConfigDiagnostics } from "./index.ts";
+import { ensureWaterProjectDirectory, loadConfigSection, reportConfigDiagnostics } from "./index.ts";
 
 function decodeDirectory(value: unknown, context: { resolvePath(value: string): string }) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("section must be an object");
@@ -12,6 +12,34 @@ function decodeDirectory(value: unknown, context: { resolvePath(value: string): 
   if (typeof section.directory !== "string") throw new Error("directory must be a string");
   return { directory: context.resolvePath(section.directory) };
 }
+
+test("initializes the project Water directory as Git-ignored local state", async () => {
+  const projectDir = mkdtempSync(join(tmpdir(), "water-project-"));
+  try {
+    const waterDir = await ensureWaterProjectDirectory(projectDir);
+
+    assert.equal(waterDir, join(projectDir, ".water"));
+    assert.equal(readFileSync(join(waterDir, ".gitignore"), "utf8"), "*\n");
+  } finally {
+    rmSync(projectDir, { recursive: true, force: true });
+  }
+});
+
+test("preserves an existing project Water gitignore", async () => {
+  const projectDir = mkdtempSync(join(tmpdir(), "water-project-existing-"));
+  const waterDir = join(projectDir, ".water");
+  const existing = "# managed by the project\n!.gitkeep\n";
+  try {
+    mkdirSync(waterDir);
+    writeFileSync(join(waterDir, ".gitignore"), existing, "utf8");
+
+    await ensureWaterProjectDirectory(projectDir);
+
+    assert.equal(readFileSync(join(waterDir, ".gitignore"), "utf8"), existing);
+  } finally {
+    rmSync(projectDir, { recursive: true, force: true });
+  }
+});
 
 test("a missing Water config uses package defaults without a diagnostic", () => {
   const agentDir = mkdtempSync(join(tmpdir(), "water-config-missing-"));

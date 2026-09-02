@@ -27,9 +27,13 @@ Pi 没有通用的工具拒绝事件，因此不统计 TeamAI 的 `toolReject` �
 默认目录是当前会话工作目录（`ctx.cwd`）下的 `.water/learnings`，不同项目各自维护经验。一条经验一个 Markdown 文件：
 
 ```text
-<project>/.water/learnings/
-└── 2026-08-31-queue-complete-file-mutations.md
+<project>/.water/
+├── .gitignore
+└── learnings/
+    └── 2026-08-31-queue-complete-file-mutations.md
 ```
+
+`session_start` 通过共享的 `@water/config` 模块初始化项目 `.water` 目录，并在缺失时创建内容为 `*` 的 `.gitignore`，使所有 Water 项目状态默认不进入 Git；已有 `.gitignore` 不会被覆盖。
 
 索引覆盖标题、标签和正文，使用 `Intl.Segmenter` 支持中英文分词；标题、标签、正文的匹配权重分别为 3、2、1。低于相关性阈值时不修改 system prompt。
 

@@ -1,10 +1,14 @@
 import { readFileSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
 
 export const WATER_CONFIG_FILE_NAME = "pi-water.json";
 export const WATER_CONFIG_VERSION = 1;
+export const WATER_PROJECT_DIRECTORY_NAME = ".water";
+
+const WATER_PROJECT_GITIGNORE_CONTENT = "*\n";
 
 export type ConfigDiagnostic = {
   message: string;
@@ -53,6 +57,20 @@ export function resolveConfigPath(value: string, configDir: string): string {
 
 export function getWaterConfigPath(agentDir = getAgentDir()): string {
   return join(agentDir, WATER_CONFIG_FILE_NAME);
+}
+
+export async function ensureWaterProjectDirectory(projectDir: string): Promise<string> {
+  const waterDir = join(resolve(projectDir), WATER_PROJECT_DIRECTORY_NAME);
+  await mkdir(waterDir, { recursive: true });
+  try {
+    await writeFile(join(waterDir, ".gitignore"), WATER_PROJECT_GITIGNORE_CONTENT, {
+      encoding: "utf8",
+      flag: "wx",
+    });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+  }
+  return waterDir;
 }
 
 export function loadConfigSection<T>(options: LoadConfigSectionOptions<T>): ConfigSectionResult<T> {
