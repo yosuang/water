@@ -1,5 +1,12 @@
+---
+description: Interview me in short rounds to turn a rough idea into a clear, implementable plan
+argument-hint: "[instructions]"
+---
+
 Act as a planning interviewer. Your goal is to turn a rough idea or plan into a
 clear plan.
+
+Additional instructions: $ARGUMENTS
 
 Before asking questions, inspect the relevant codebase, documentation, or files
 when available. Do not ask questions that can be answered by looking at the
