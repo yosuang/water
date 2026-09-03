@@ -15,6 +15,7 @@ import {
   frictionHint,
   frictionReasons,
   hasAssistantResponse,
+  hasCapturableFriction,
   hintWidgetLines,
   isCorrectionPrompt,
   type LearningCard,
@@ -127,7 +128,6 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
   let availableCaptureGrants = 0;
   let beforeAgentUserPrompt: string | undefined;
   let pendingCaptureRequests = 0;
-  let hintWidgetVisible = false;
   const queuedRecallContexts: string[] = [];
 
   // The hint entry is invisible without a renderer, so register one for TUI transcripts.
@@ -194,10 +194,13 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
     availableCaptureGrants = 0;
     beforeAgentUserPrompt = undefined;
     pendingCaptureRequests = 0;
-    hintWidgetVisible = false;
     queuedRecallContexts.length = 0;
     // A widget from the previous runtime instance (reload/session switch) may still be on screen.
-    if (ctx.mode === "tui") ctx.ui.setWidget(HINT_WIDGET_KEY, undefined);
+    // Re-pin it when the restored branch still holds uncaptured friction, otherwise clear the stale one.
+    if (ctx.mode === "tui") {
+      const friction = evaluateSessionFriction(ctx.sessionManager.getBranch(), STATE_ENTRY_TYPE);
+      ctx.ui.setWidget(HINT_WIDGET_KEY, hasCapturableFriction(friction) ? hintWidgetLines(friction) : undefined);
+    }
     try {
       await ensureWaterProjectDirectory(ctx.cwd);
       const result = await store.reload();
@@ -218,12 +221,8 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
   });
 
   pi.on("input", (event, ctx) => {
+    // The hint widget deliberately stays pinned here; only a successful save takes it down.
     if (event.source === "extension") return;
-    // The widget did its job once the user starts acting again.
-    if (hintWidgetVisible && ctx.mode === "tui") {
-      hintWidgetVisible = false;
-      ctx.ui.setWidget(HINT_WIDGET_KEY, undefined);
-    }
     if (event.streamingBehavior === "steer") {
       pi.appendEntry(STATE_ENTRY_TYPE, {
         kind: "interrupt",
@@ -309,7 +308,6 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
     pi.appendEntry(HINT_ENTRY_TYPE, { friction } satisfies ExperienceHintEntry);
 
     if (ctx.mode === "tui") {
-      hintWidgetVisible = true;
       ctx.ui.setWidget(HINT_WIDGET_KEY, hintWidgetLines(friction));
       return;
     }
@@ -339,6 +337,8 @@ export default function experienceLoopExtension(pi: ExtensionAPI, options: Exper
         id: saved.id,
         timestamp: now().getTime(),
       } satisfies ExperienceStateEntry);
+      // Saving fulfilled the pinned reminder, so this is the one place the widget comes down.
+      if (ctx.mode === "tui") ctx.ui.setWidget(HINT_WIDGET_KEY, undefined);
       if (ctx.hasUI) ctx.ui.notify(`Saved learning: ${saved.id}`, "info");
 
       return {

@@ -856,7 +856,7 @@ function hintEntryData(): unknown {
   };
 }
 
-test("a TUI hint renders as a transcript card plus a widget cleared on the next input", async () => {
+test("a TUI hint renders as a transcript card plus a widget pinned until the learning is saved", async () => {
   const learningsDir = mkdtempSync(join(tmpdir(), "water-learnings-"));
 
   try {
@@ -894,9 +894,86 @@ test("a TUI hint renders as a transcript card plus a widget cleared on the next 
         key: "water-experience-hint",
         content: ["Capturable experience (a correction): run /skill:capture-learning"],
       },
+    ]);
+
+    await authorizeCapture(extension);
+    await extension.getSaveTool().execute(
+      "call-widget-pin",
+      {
+        title: "Pin the capture widget until saved",
+        tags: ["workflow", "ux"],
+        applicability: "A friction hint appears while the user's task is still running.",
+        lesson: "Keep the capture widget pinned until the learning is actually saved.",
+        rationale: "The user often cannot act on the reminder before finishing the current task.",
+        verification: "Send another user input and confirm the widget remains visible.",
+        limitations: "A saved learning takes the widget down immediately.",
+      },
+      undefined,
+      undefined,
+      extension.ctx,
+    );
+    assert.deepEqual(extension.widgetUpdates, [
+      { key: "water-experience-hint", content: undefined },
+      {
+        key: "water-experience-hint",
+        content: ["Capturable experience (a correction): run /skill:capture-learning"],
+      },
       { key: "water-experience-hint", content: undefined },
     ]);
     assert.equal(extension.entries.filter((entry) => entry.customType === "water-experience-hint").length, 1);
+  } finally {
+    rmSync(learningsDir, { recursive: true, force: true });
+  }
+});
+
+test("session_start re-pins the widget for a restored branch with uncaptured friction", async () => {
+  const learningsDir = mkdtempSync(join(tmpdir(), "water-learnings-"));
+
+  try {
+    const branch = [
+      assistantWithToolCalls(15),
+      { type: "custom", customType: "water-experience-loop-state", data: { kind: "correction", timestamp: 1 } },
+      { type: "custom", customType: "water-experience-loop-state", data: { kind: "hinted", timestamp: 2 } },
+    ];
+    const extension = loadExtension(learningsDir, branch, { mode: "tui" });
+    await extension.getHandler("session_start")({}, extension.ctx);
+
+    assert.deepEqual(extension.widgetUpdates, [
+      {
+        key: "water-experience-hint",
+        content: ["Capturable experience (a correction): run /skill:capture-learning"],
+      },
+    ]);
+    assert.deepEqual(extension.notifications, []);
+    // Re-pinning restores only the widget; it must not duplicate hint entries or re-notify.
+    assert.equal(extension.entries.filter((entry) => entry.customType === "water-experience-hint").length, 0);
+    assert.equal(extension.entries.some((entry) => (entry.data as { kind?: string }).kind === "hinted"), false);
+  } finally {
+    rmSync(learningsDir, { recursive: true, force: true });
+  }
+});
+
+test("session_start clears a leftover widget when the friction is saved or below the gate", async () => {
+  const learningsDir = mkdtempSync(join(tmpdir(), "water-learnings-"));
+
+  try {
+    const savedBranch = [
+      assistantWithToolCalls(15),
+      { type: "custom", customType: "water-experience-loop-state", data: { kind: "correction", timestamp: 1 } },
+      { type: "custom", customType: "water-experience-loop-state", data: { kind: "hinted", timestamp: 2 } },
+      {
+        type: "custom",
+        customType: "water-experience-loop-state",
+        data: { kind: "saved", id: "2026-08-31-pinned", timestamp: 3 },
+      },
+    ];
+    const savedExtension = loadExtension(learningsDir, savedBranch, { mode: "tui" });
+    await savedExtension.getHandler("session_start")({}, savedExtension.ctx);
+    assert.deepEqual(savedExtension.widgetUpdates, [{ key: "water-experience-hint", content: undefined }]);
+
+    const quietExtension = loadExtension(learningsDir, [assistantWithToolCalls(15)], { mode: "tui" });
+    await quietExtension.getHandler("session_start")({}, quietExtension.ctx);
+    assert.deepEqual(quietExtension.widgetUpdates, [{ key: "water-experience-hint", content: undefined }]);
   } finally {
     rmSync(learningsDir, { recursive: true, force: true });
   }

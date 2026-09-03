@@ -7,7 +7,7 @@
 1. `session_start` 加载当前会话项目目录下的 `.water/learnings/*.md`。
 2. `before_agent_start` 对空闲时提交的任务做本地 IDF 加权词法检索；queued steer/followUp 在 user `message_end` 检索，并在下一次 `context` 注入。相关结果最多 3 条、每组不超过 1200 字符。
 3. `input` 记录用户纠正和 streaming steer，不保存输入文本。
-4. `agent_settled` 从当前 session branch 统计工具调用、错误和打断；达到门槛后提示一次 `/skill:capture-learning`。交互式 TUI 下提示渲染为聊天流内的高亮卡片（`water-experience-hint` custom entry + entry renderer，随 session 持久化，展开可见摩擦明细），同时在输入框上方显示一行 widget，下一次用户输入时自动撤下；其它带 UI 的模式（RPC）退回 `notify` 通知。
+4. `agent_settled` 从当前 session branch 统计工具调用、错误和打断；达到门槛后提示一次 `/skill:capture-learning`。交互式 TUI 下提示渲染为聊天流内的高亮卡片（`water-experience-hint` custom entry + entry renderer，随 session 持久化，展开可见摩擦明细），同时在输入框上方显示一行 widget；widget 一直钉住，直到经验成功保存才撤下（校验失败保留，方便重试）。session 恢复（resume/fork/reload）时依据当前 branch 的摩擦状态重新钉住或清掉残留 widget。其它带 UI 的模式（RPC）退回 `notify` 通知。
 5. `save_learning` 只接受本包 skill 已成功展开的显式用户调用；每次展开授权一次写入，写入标准 Markdown 并立即刷新索引。
 
 `session_shutdown` 不承担提示职责，因为此时旧 session runtime 正在拆除。

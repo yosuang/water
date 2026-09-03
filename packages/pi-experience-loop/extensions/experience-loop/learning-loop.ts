@@ -400,7 +400,12 @@ export function hintWidgetLines(friction: SessionFriction): string[] {
 }
 
 export function shouldHintForLearning(friction: SessionFriction): boolean {
-  return !friction.hasHinted && !friction.hasSaved && friction.toolCount >= 15 && friction.score >= 20;
+  return !friction.hasHinted && hasCapturableFriction(friction);
+}
+
+/** True while the branch still holds uncaptured friction worth pinning a widget for. */
+export function hasCapturableFriction(friction: SessionFriction): boolean {
+  return !friction.hasSaved && friction.toolCount >= 15 && friction.score >= 20;
 }
 
 type WriteOutcome = "created" | "occupied" | "same";
