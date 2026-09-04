@@ -54,7 +54,7 @@
       "ref": "main",
       "sourceType": "github",
       "skillPath": "skills/hunt/SKILL.md",
-      "computedHash": "42031e6a62e06984d3c8eb2800f99f407d4b870e192296114501f8e680d08eeb",
+      "computedHash": "80b50e44c197f661ae6f84f95d95958a65c94de8097542bdee97ddb18e3ae823",
       "claudePlugin": "waza"
     },
     "implement": {
@@ -93,7 +93,7 @@
       "ref": "main",
       "sourceType": "github",
       "skillPath": "skills/think/SKILL.md",
-      "computedHash": "8a40cb2afa968ffaf93adfeefd548f5a1784d30a7e82261396ca3ac1d6f0573d",
+      "computedHash": "50bbae21386287defdd8d2b6cbe403465ee672143780a5ca9059afa41f0a41cc",
       "claudePlugin": "waza"
     },
     "vercel-react-best-practices": {
@@ -107,7 +107,7 @@
       "ref": "main",
       "sourceType": "github",
       "skillPath": "skills/write/SKILL.md",
-      "computedHash": "964f0a90e1c55744225868062f6796d3f7864ec0560486c21e3d9975c5e1e061",
+      "computedHash": "b8eaa54a4e2861d5bb7fa544fda0e4483eb6c42cd14a5f9692a7a5f2654fadaf",
       "claudePlugin": "waza"
     },
     "writing-for-agents": {
