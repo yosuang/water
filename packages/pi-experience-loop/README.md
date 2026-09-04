@@ -59,6 +59,20 @@ Pi 没有通用的工具拒绝事件，因此不统计 TeamAI 的 `toolReject` �
 - 常见密钥、私钥、带凭据 URL、本机绝对/用户目录路径和 transcript 形状会被拒绝；用 inline backticks 标记的 API routes、slash commands 与 regex literals 保持可用。skill 还会移除项目私有事实。
 - 原始 transcript 不会复制到经验目录。
 
+## 代码结构
+
+`src/experience-loop.ts` 是唯一的 Pi extension 入口和事件装配点。其余源码按行为拆分：
+
+- `capture-authorization.ts`：显式 capture skill 的单次写入授权；
+- `experience-recall.ts`：即时与 queued prompt 的召回和上下文注入；
+- `session-friction.ts`：branch 摩擦统计与提示策略；
+- `experience-hint.ts`：TUI 卡片、widget 和通知文案；
+- `learning-card.ts`：卡片 schema、安全校验与 Markdown 格式；
+- `learning-store.ts`：持久化、索引、检索和并发写入；
+- `experience-config.ts`：包配置解码和经验目录解析。
+
+Pi 事件注册集中在入口文件，避免监听器顺序分散到多个模块。测试位于 `test/`，共享的 Pi fake runtime 位于 `test/support/fake-pi.ts`。
+
 ## 非目标
 
 V1 不包含 Git 自动同步、团队投票、HTML doc-id 标记、向量数据库、dashboard 或代码知识图谱。删除 extension 即可停止闭环，已有经验文件保持不变。

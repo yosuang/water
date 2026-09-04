@@ -18,7 +18,7 @@
     ],
     "extensions": [
       "./packages/pi-agent-stuff/extensions",
-      "./packages/pi-experience-loop/extensions",
+      "./packages/pi-experience-loop/src/experience-loop.ts",
       "./packages/pi-herdr-subagent/extensions",
       "./packages/pi-instructions/extensions"
     ],
