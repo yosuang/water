@@ -1,27 +1,3 @@
-import type { ToolDefinition } from "@earendil-works/pi-coding-agent";
-
-type ToolParameters = ToolDefinition["parameters"];
-
-export const SAVE_LEARNING_PARAMETERS = {
-  type: "object",
-  properties: {
-    title: { type: "string", description: "Short title for the reusable learning" },
-    tags: {
-      type: "array",
-      items: { type: "string" },
-      minItems: 2,
-      maxItems: 5,
-    },
-    applicability: { type: "string", description: "When this learning applies" },
-    lesson: { type: "string", description: "The reusable conclusion or rule" },
-    rationale: { type: "string", description: "Why the conclusion is correct" },
-    verification: { type: "string", description: "How to verify the learning in practice" },
-    limitations: { type: "string", description: "When this learning does not apply" },
-  },
-  required: ["title", "tags", "applicability", "lesson", "rationale", "verification", "limitations"],
-  additionalProperties: false,
-} as ToolParameters;
-
 export type LearningCard = {
   title: string;
   tags: string[];
@@ -58,8 +34,29 @@ const RAW_TRANSCRIPT_PATTERNS = [
 ];
 const UNMARKED_POSIX_PATH = /(?:^|[\s("'])\/(?!\/)[^\s]+/mu;
 const REQUIRED_SECTIONS = ["适用场景", "可复用结论", "原因", "验证方式", "不适用"] as const;
+const CARD_FIELDS = ["title", "tags", "applicability", "lesson", "rationale", "verification", "limitations"] as const;
 
 export class LearningValidationError extends Error {}
+
+function decodeLearningCard(value: unknown): LearningCard {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new LearningValidationError("Learning card must be an object.");
+  }
+  const record = value as Record<string, unknown>;
+  const unknownField = Object.keys(record).find((key) => !CARD_FIELDS.includes(key as (typeof CARD_FIELDS)[number]));
+  if (unknownField) throw new LearningValidationError(`Unknown learning field: ${unknownField}.`);
+  if (!Array.isArray(record.tags)) throw new LearningValidationError("tags must be an array.");
+
+  return {
+    title: record.title as string,
+    tags: record.tags as string[],
+    applicability: record.applicability as string,
+    lesson: record.lesson as string,
+    rationale: record.rationale as string,
+    verification: record.verification as string,
+    limitations: record.limitations as string,
+  };
+}
 
 function normalizeField(value: unknown, name: string, maxLength = MAX_FIELD_LENGTH): string {
   if (value === undefined || value === null) throw new LearningValidationError(`${name} is required.`);
@@ -163,8 +160,8 @@ function section(body: string, heading: string): string {
   );
 }
 
-export function prepareLearningCard(rawCard: LearningCard, now: Date): PreparedLearningCard {
-  const card = normalizeLearningCard(rawCard);
+export function prepareLearningCard(rawCard: unknown, now: Date): PreparedLearningCard {
+  const card = normalizeLearningCard(decodeLearningCard(rawCard));
   const date = now.toISOString().slice(0, 10);
   return {
     baseId: `${date}-${slugify(card.title)}`,

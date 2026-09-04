@@ -1,8 +1,7 @@
 import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
-import { withFileMutationQueue } from "@earendil-works/pi-coding-agent";
-import { type LearningCard, parseLearningCard, prepareLearningCard } from "./learning-card.ts";
+import { parseLearningCard, prepareLearningCard } from "./learning-card.ts";
 
 export type SavedLearning = {
   id: string;
@@ -105,14 +104,13 @@ export class LearningStore {
     return { loaded: this.#entries.length, skipped: files.length - this.#entries.length };
   }
 
-  async save(rawCard: LearningCard, now: Date): Promise<SavedLearning> {
+  async save(rawCard: unknown, now: Date): Promise<SavedLearning> {
     const { baseId, content } = prepareLearningCard(rawCard, now);
     const basePath = join(this.#learningsDir, `${baseId}.md`);
 
     await mkdir(this.#learningsDir, { recursive: true });
-    const baseOutcome = await withFileMutationQueue(basePath, () => writeIfAbsentOrSame(basePath, content));
+    const baseOutcome = await writeIfAbsentOrSame(basePath, content);
     if (baseOutcome !== "occupied") {
-      await this.reload();
       return { id: baseId, path: basePath, created: baseOutcome === "created" };
     }
 
@@ -120,17 +118,15 @@ export class LearningStore {
     for (let attempt = 0; ; attempt += 1) {
       const collisionId = attempt === 0 ? hashId : `${hashId}-${attempt + 1}`;
       const collisionPath = join(this.#learningsDir, `${collisionId}.md`);
-      const collisionOutcome = await withFileMutationQueue(collisionPath, () =>
-        writeIfAbsentOrSame(collisionPath, content),
-      );
+      const collisionOutcome = await writeIfAbsentOrSame(collisionPath, content);
       if (collisionOutcome === "occupied") continue;
 
-      await this.reload();
       return { id: collisionId, path: collisionPath, created: collisionOutcome === "created" };
     }
   }
 
-  search(query: string): LearningSearchResult[] {
+  async search(query: string): Promise<LearningSearchResult[]> {
+    await this.reload();
     const queryTokens = tokenize(query);
     if (queryTokens.size === 0 || this.#entries.length === 0) return [];
 

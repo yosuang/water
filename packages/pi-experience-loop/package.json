@@ -22,14 +22,7 @@
       "./skills"
     ]
   },
-  "dependencies": {
-    "@water/config": "*"
-  },
-  "bundledDependencies": [
-    "@water/config"
-  ],
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "*",
-    "@earendil-works/pi-tui": "*"
+    "@earendil-works/pi-coding-agent": "*"
   }
 }
