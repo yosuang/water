@@ -8,8 +8,7 @@
   ],
   "files": [
     "src",
-    "skills",
-    "README.md"
+    "skills"
   ],
   "scripts": {
     "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test test"

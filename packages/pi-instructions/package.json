@@ -8,8 +8,7 @@
   ],
   "files": [
     "extensions/*/index.ts",
-    "instructions",
-    "README.md"
+    "instructions"
   ],
   "scripts": {
     "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test extensions/instructions/index.test.ts"

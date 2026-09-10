@@ -8,8 +8,7 @@
   ],
   "files": [
     "extensions/*/index.ts",
-    "skills",
-    "README.md"
+    "skills"
   ],
   "scripts": {
     "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test extensions/herdr-subagent/index.test.ts"
