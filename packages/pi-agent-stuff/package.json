@@ -9,8 +9,6 @@
   "files": [
     "extensions/*/index.ts",
     "extensions/*/README.md",
-    "extensions/prompt-stash/CONTEXT.md",
-    "extensions/prompt-stash/docs",
     "prompts",
     "skills",
     "README.md"
