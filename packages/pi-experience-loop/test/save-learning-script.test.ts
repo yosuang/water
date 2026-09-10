@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import test from "node:test";
@@ -62,7 +71,10 @@ test("the standalone TypeScript script saves a learning and completes physical s
     const output = JSON.parse(result.stdout);
     assert.equal(output.created, true);
     assert.equal(existsSync(output.path), true);
-    assert.equal(output.sessionStatePath, join(projectDir, ".water", "sessions", "pi-session-1.json"));
+    assert.equal(
+      realpathSync(output.sessionStatePath),
+      realpathSync(join(projectDir, ".water", "sessions", "pi-session-1.json")),
+    );
     const state = JSON.parse(readFileSync(output.sessionStatePath, "utf8"));
     assert.equal(state.capture.learningId, output.id);
     assert.equal(typeof state.capture.savedAt, "number");
@@ -83,7 +95,10 @@ test("the script accepts agent-neutral Water session identity", () => {
     });
     assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
-    assert.equal(output.sessionStatePath, join(projectDir, ".water", "sessions", "codex-thr_123.json"));
+    assert.equal(
+      realpathSync(output.sessionStatePath),
+      realpathSync(join(projectDir, ".water", "sessions", "codex-thr_123.json")),
+    );
   } finally {
     rmSync(rootDir, { recursive: true, force: true });
   }

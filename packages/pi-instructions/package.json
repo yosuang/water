@@ -1,6 +1,6 @@
 {
-  "name": "pi-instructions",
-  "version": "0.1.0",
+  "name": "@yosuang/pi-instructions",
+  "version": "0.0.1",
   "description": "Load Water's shared personal instructions into Pi.",
   "type": "module",
   "keywords": [
@@ -20,12 +20,12 @@
     ]
   },
   "dependencies": {
-    "@water/config": "*",
-    "@water/shared": "*"
+    "@yosuang/config": "*",
+    "@yosuang/shared": "*"
   },
   "bundledDependencies": [
-    "@water/config",
-    "@water/shared"
+    "@yosuang/config",
+    "@yosuang/shared"
   ],
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*"

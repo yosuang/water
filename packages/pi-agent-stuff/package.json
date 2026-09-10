@@ -1,6 +1,6 @@
 {
-  "name": "pi-agent-stuff",
-  "version": "0.1.0",
+  "name": "@yosuang/pi-agent-stuff",
+  "version": "0.0.1",
   "description": "Small, general-purpose Pi extensions and skills from Water.",
   "type": "module",
   "keywords": [
@@ -11,6 +11,7 @@
     "extensions/*/README.md",
     "extensions/prompt-stash/CONTEXT.md",
     "extensions/prompt-stash/docs",
+    "prompts",
     "skills",
     "README.md"
   ],
@@ -29,10 +30,10 @@
     ]
   },
   "dependencies": {
-    "@water/shared": "*"
+    "@yosuang/shared": "*"
   },
   "bundledDependencies": [
-    "@water/shared"
+    "@yosuang/shared"
   ],
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",

@@ -8,8 +8,8 @@
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { type ConfigDecodeContext, loadConfigSection, reportConfigDiagnostics } from "@water/config";
-import { scanMarkdownTree, splitFrontmatter } from "@water/shared";
+import { type ConfigDecodeContext, loadConfigSection, reportConfigDiagnostics } from "@yosuang/config";
+import { scanMarkdownTree, splitFrontmatter } from "@yosuang/shared";
 
 type LoadedInstruction = {
   sourcePath: string;

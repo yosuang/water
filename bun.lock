@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "water",
+      "name": "@yosuang/water",
       "devDependencies": {
         "@biomejs/biome": "2.5.4",
         "@earendil-works/pi-ai": "0.84.4",
@@ -20,14 +20,14 @@
       },
     },
     "packages/config": {
-      "name": "@water/config",
-      "version": "0.1.0",
+      "name": "@yosuang/config",
+      "version": "0.0.1",
     },
     "packages/pi-agent-stuff": {
-      "name": "pi-agent-stuff",
-      "version": "0.1.0",
+      "name": "@yosuang/pi-agent-stuff",
+      "version": "0.0.1",
       "dependencies": {
-        "@water/shared": "*",
+        "@yosuang/shared": "*",
       },
       "peerDependencies": {
         "@earendil-works/pi-coding-agent": "*",
@@ -35,15 +35,15 @@
       },
     },
     "packages/pi-experience-loop": {
-      "name": "pi-experience-loop",
-      "version": "0.1.0",
+      "name": "@yosuang/pi-experience-loop",
+      "version": "0.0.1",
       "peerDependencies": {
         "@earendil-works/pi-coding-agent": "*",
       },
     },
     "packages/pi-herdr-subagent": {
-      "name": "pi-herdr-subagent",
-      "version": "0.1.0",
+      "name": "@yosuang/pi-herdr-subagent",
+      "version": "0.0.1",
       "peerDependencies": {
         "@earendil-works/pi-ai": "*",
         "@earendil-works/pi-coding-agent": "*",
@@ -51,19 +51,19 @@
       },
     },
     "packages/pi-instructions": {
-      "name": "pi-instructions",
-      "version": "0.1.0",
+      "name": "@yosuang/pi-instructions",
+      "version": "0.0.1",
       "dependencies": {
-        "@water/config": "*",
-        "@water/shared": "*",
+        "@yosuang/config": "*",
+        "@yosuang/shared": "*",
       },
       "peerDependencies": {
         "@earendil-works/pi-coding-agent": "*",
       },
     },
     "packages/shared": {
-      "name": "@water/shared",
-      "version": "0.1.0",
+      "name": "@yosuang/shared",
+      "version": "0.0.1",
     },
   },
   "packages": {
@@ -257,9 +257,17 @@
 
     "@typescript/typescript-win32-x64": ["@typescript/typescript-win32-x64@7.0.2", "", { "os": "win32", "cpu": "x64" }, "sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g=="],
 
-    "@water/config": ["@water/config@workspace:packages/config"],
+    "@yosuang/config": ["@yosuang/config@workspace:packages/config"],
 
-    "@water/shared": ["@water/shared@workspace:packages/shared"],
+    "@yosuang/pi-agent-stuff": ["@yosuang/pi-agent-stuff@workspace:packages/pi-agent-stuff"],
+
+    "@yosuang/pi-experience-loop": ["@yosuang/pi-experience-loop@workspace:packages/pi-experience-loop"],
+
+    "@yosuang/pi-herdr-subagent": ["@yosuang/pi-herdr-subagent@workspace:packages/pi-herdr-subagent"],
+
+    "@yosuang/pi-instructions": ["@yosuang/pi-instructions@workspace:packages/pi-instructions"],
+
+    "@yosuang/shared": ["@yosuang/shared@workspace:packages/shared"],
 
     "agent-base": ["agent-base@7.1.4", "", {}, "sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ=="],
 
@@ -352,14 +360,6 @@
     "partial-json": ["partial-json@0.1.7", "", {}, "sha512-Njv/59hHaokb/hRUjce3Hdv12wd60MtM9Z5Olmn+nehe0QDAsRtRbJPvJ0Z91TusF0SuZRIvnM+S4l6EIP8leA=="],
 
     "path-key": ["path-key@3.1.1", "", {}, "sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q=="],
-
-    "pi-agent-stuff": ["pi-agent-stuff@workspace:packages/pi-agent-stuff"],
-
-    "pi-experience-loop": ["pi-experience-loop@workspace:packages/pi-experience-loop"],
-
-    "pi-herdr-subagent": ["pi-herdr-subagent@workspace:packages/pi-herdr-subagent"],
-
-    "pi-instructions": ["pi-instructions@workspace:packages/pi-instructions"],
 
     "proper-lockfile": ["proper-lockfile@4.1.2", "", { "dependencies": { "graceful-fs": "^4.2.4", "retry": "^0.12.0", "signal-exit": "^3.0.2" } }, "sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA=="],
 

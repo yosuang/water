@@ -22,7 +22,7 @@
 
 import { join } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { scanMarkdownTree, splitFrontmatter } from "@water/shared";
+import { scanMarkdownTree, splitFrontmatter } from "@yosuang/shared";
 
 type LoadedRule = {
   relativePath: string;

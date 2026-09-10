@@ -1,6 +1,6 @@
 {
-  "name": "pi-herdr-subagent",
-  "version": "0.1.0",
+  "name": "@yosuang/pi-herdr-subagent",
+  "version": "0.0.1",
   "description": "Model-aware Herdr subagent orchestration for Pi.",
   "type": "module",
   "keywords": [
