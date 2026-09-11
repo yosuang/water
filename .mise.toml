@@ -1,2 +1,21 @@
 [tools]
 bun = "latest"
+
+[tasks."prepare:publish"]
+run = "bun install --frozen-lockfile"
+
+[tasks."publish:pi-agent-stuff"]
+depends = ["prepare:publish"]
+run = "npm publish --workspace=@yosuang/pi-agent-stuff --access public"
+
+[tasks."publish:pi-experience-loop"]
+depends = ["prepare:publish"]
+run = "npm publish --workspace=@yosuang/pi-experience-loop --access public"
+
+[tasks."publish:pi-herdr-subagent"]
+depends = ["prepare:publish"]
+run = "npm publish --workspace=@yosuang/pi-herdr-subagent --access public"
+
+[tasks."publish:pi-instructions"]
+depends = ["prepare:publish"]
+run = "npm publish --workspace=@yosuang/pi-instructions --access public"
